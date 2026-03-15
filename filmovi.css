@@ -2,8 +2,8 @@ header{
     position:fixed;
     top:0;
     width: 100%;
-    border-bottom: 1px solid black ;
-    background:white;
+    border-bottom: 2px solid black ;
+    background:rgb(190, 190, 190);
 }
 body{
  margin:0;
@@ -18,7 +18,13 @@ ul{
 }
 li{
     margin:15px;
+    padding: 10px;
+    background-color: white;
+    border-color: black;
+    border: 1px solid black; 
+    border-radius : 1px;
 }
+
 a{
     color:black;
     text-decoration:none;
@@ -27,3 +33,85 @@ main {
     margin-top: 60px;
     padding: 20px;
 } 
+#akcija, #drama, #komedija, #animirani{
+    margin-bottom: 30px;
+}
+
+.filmovi{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; 
+    margin-top: 20px; 
+    margin-left: 10px;
+}
+
+.film{
+    flex-basis:200px;
+    box-sizing:border-box;
+    border:1px solid black;
+    display:flex;
+    flex-direction:column;
+}
+
+.film img{
+    width:100%;
+    height:auto;
+    display:block;
+    height: 200px;
+    padding:10px;
+
+}
+
+.trenutno{
+    background-color: white;
+    .naziv{
+        background:white;
+    }
+    .trajanje{
+        background:white;
+    } 
+}
+
+.uskoro{
+    background-color: powderblue;
+    .naziv {
+        background:powderblue;
+    } 
+    .trajanje {
+        background:powderblue; 
+    } 
+}
+
+.nije{
+    background-color: gray;
+        .naziv {
+        background:gray ;
+    } 
+    .trajanje {
+        background:gray; 
+    } 
+}
+.film-info{
+    background:white;
+    border-top:1px solid black;
+    margin-top:auto;
+    width:100%;
+}
+
+.naziv{
+    padding:5px;
+    font-weight:bold;
+    border-bottom:1px solid black;
+    margin:0;
+}
+
+.trajanje{
+    padding:5px;
+    font-size:14px;
+    margin:0;
+}
+h2{
+    border-bottom:1px solid black;
+    padding-bottom:5px;
+    margin-left: 5px;
+}
