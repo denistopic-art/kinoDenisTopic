@@ -113,3 +113,23 @@ main{
 .rezervisano{
     background-color: darkgray;
 }
+.legenda{
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 20px 0 40px 0;
+}
+
+.stavka-legende{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.kvadrat{
+    width: 20px;
+    height: 20px;
+    border: 1px solid black;
+    box-sizing: border-box;
+}
