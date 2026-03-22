@@ -50,4 +50,19 @@ main{
     justify-content: center;
     gap: 30px;
     font-size: 14px;
+    color: gray;
+}
+.linija{
+    width: 60%;
+    margin: 20px auto;
+    border: 1px solid black;
+}
+
+.platno{
+    width: 60%;
+    margin: 30px auto 30px auto;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid black;
+    background-color: lightgray;
 }
