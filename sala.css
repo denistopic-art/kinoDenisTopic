@@ -34,3 +34,20 @@ a{
 main{
     margin-top: 100px;
 }
+.info{
+    text-align: center;
+    margin-top: 40px;
+}
+
+.info h1{
+    margin-bottom: 10px;
+    font-size: 24px;
+    font-weight: normal;
+}
+
+.detalji{
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    font-size: 14px;
+}
