@@ -31,9 +31,7 @@ function prikaziSalu() {
     oznakeRedovaHTML += `<div>${red}</div>`;
 
     for (const sjediste of redovi[red]) {
-      sjedistaHTML += `
-        <div class="sjediste ${sjediste.status}"></div>
-      `;
+      sjedistaHTML += `<div class="sjediste ${sjediste.status}"></div>`;
     }
   }
 
@@ -77,4 +75,40 @@ function prikaziSalu() {
       </div>
     </div>
   `;
+
+  osvjeziDugmad();
+}
+
+function idiNaPrethodnuProjekciju() {
+  if (trenutnaProjekcijaIndex > 0) {
+    trenutnaProjekcijaIndex--;
+    prikaziSalu();
+  }
+}
+
+function idiNaSljedecuProjekciju() {
+  if (trenutnaProjekcijaIndex < podaci.projekcije.length - 1) {
+    trenutnaProjekcijaIndex++;
+    prikaziSalu();
+  }
+}
+
+function osvjeziDugmad() {
+  const prethodnaBtn = document.getElementById("prethodnaBtn");
+  const sljedecaBtn = document.getElementById("sljedecaBtn");
+
+  prethodnaBtn.disabled = trenutnaProjekcijaIndex === 0;
+  sljedecaBtn.disabled = trenutnaProjekcijaIndex === podaci.projekcije.length - 1;
+}
+
+function pokreniAplikaciju() {
+  document
+    .getElementById("prethodnaBtn")
+    .addEventListener("click", idiNaPrethodnuProjekciju);
+
+  document
+    .getElementById("sljedecaBtn")
+    .addEventListener("click", idiNaSljedecuProjekciju);
+
+  prikaziSalu();
 }
