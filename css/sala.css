@@ -168,6 +168,13 @@ main{
 .sjediste {
   cursor: pointer;
 }
+.greska {
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: #b00020;
+  margin: 40px 0;
+}
 @media (max-width: 700px){
     .detalji{
         flex-direction: column;

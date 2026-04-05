@@ -1,5 +1,32 @@
 let trenutnaProjekcijaIndex = 0;
+const DOZVOLJENI_STATUSI = ["slobodno", "zauzeto", "rezervisano"];
+function validirajPodatke(podaci) {
+  if (!podaci || !Array.isArray(podaci.projekcije) || podaci.projekcije.length === 0) {
+    return false;
+  }
 
+  for (const projekcija of podaci.projekcije) {
+    if (!projekcija.film || !projekcija.vrijeme || !Array.isArray(projekcija.sjedista)) {
+      return false;
+    }
+
+    for (const sjediste of projekcija.sjedista) {
+      if (
+        !sjediste.red ||
+        typeof sjediste.broj !== "number" ||
+        !DOZVOLJENI_STATUSI.includes(sjediste.status)
+      ) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+function prikaziGresku() {
+  const sala = document.getElementById("sala");
+  sala.innerHTML = `<p class="greska">Podaci nisu validni!</p>`;
+}
 function grupisiSjedistaPoRedovima(sjedista) {
   const redovi = {};
 
@@ -20,7 +47,14 @@ function grupisiSjedistaPoRedovima(sjedista) {
 }
 
 function prikaziSalu() {
+    
   const sala = document.getElementById("sala");
+
+  if (!validirajPodatke(podaci)) {
+    prikaziGresku();
+    return;
+  }
+
   const projekcija = podaci.projekcije[trenutnaProjekcijaIndex];
   const { redovi, sortiraniRedovi } = grupisiSjedistaPoRedovima(projekcija.sjedista);
 

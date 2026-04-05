@@ -5,7 +5,7 @@ const podaci = {
       vrijeme: "18:00",
       sjedista: [
         { red: "A", broj: 1, status: "slobodno" },
-        { red: "A", broj: 2, status: "zauzeto" },
+        { red: "A", broj: 2, status: "slobodno" },
         { red: "A", broj: 3, status: "rezervisano" },
         { red: "A", broj: 4, status: "slobodno" },
         { red: "A", broj: 5, status: "slobodno" },
