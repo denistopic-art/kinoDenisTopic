@@ -31,7 +31,10 @@ function prikaziSalu() {
     oznakeRedovaHTML += `<div>${red}</div>`;
 
     for (const sjediste of redovi[red]) {
-      sjedistaHTML += `<div class="sjediste ${sjediste.status}"></div>`;
+      sjedistaHTML += `<div class="sjediste ${sjediste.status}"
+        data-red="${sjediste.red}"
+        data-broj="${sjediste.broj}"
+        title="Red ${sjediste.red}, sjedište ${sjediste.broj}"></div>`;
     }
   }
 
@@ -77,6 +80,27 @@ function prikaziSalu() {
   `;
 
   osvjeziDugmad();
+  dodajKlikNaSjedista();
+}
+function dodajKlikNaSjedista() {
+  const elementiSjedista = document.querySelectorAll(".sjediste");
+
+  elementiSjedista.forEach((element) => {
+    element.addEventListener("click", function () {
+      const red = this.dataset.red;
+      const broj = Number(this.dataset.broj);
+
+      const projekcija = podaci.projekcije[trenutnaProjekcijaIndex];
+      const sjediste = projekcija.sjedista.find(
+        (s) => s.red === red && s.broj === broj
+      );
+
+      if (sjediste && sjediste.status === "slobodno") {
+        sjediste.status = "rezervisano";
+        prikaziSalu();
+      }
+    });
+  });
 }
 
 function idiNaPrethodnuProjekciju() {
@@ -100,6 +124,7 @@ function osvjeziDugmad() {
   prethodnaBtn.disabled = trenutnaProjekcijaIndex === 0;
   sljedecaBtn.disabled = trenutnaProjekcijaIndex === podaci.projekcije.length - 1;
 }
+
 
 function pokreniAplikaciju() {
   document

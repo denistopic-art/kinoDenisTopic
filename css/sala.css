@@ -165,7 +165,9 @@ main{
   cursor: not-allowed;
   opacity: 0.7;
 }
-
+.sjediste {
+  cursor: pointer;
+}
 @media (max-width: 700px){
     .detalji{
         flex-direction: column;
@@ -186,6 +188,7 @@ main{
     .sjediste{
         width: 32px;
         height: 32px;
+        cursor: pointer;
     }
 
     .oznake-redova{
