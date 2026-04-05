@@ -97,3 +97,4 @@ const podaci = {
 };
 
 console.log(podaci);
+document.addEventListener("DOMContentLoaded", prikaziOsnovnuSalu);
