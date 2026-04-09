@@ -1,5 +1,8 @@
+let podaci = null;
 let trenutnaProjekcijaIndex = 0;
+
 const DOZVOLJENI_STATUSI = ["slobodno", "zauzeto", "rezervisano"];
+
 function validirajPodatke(podaci) {
   if (!podaci || !Array.isArray(podaci.projekcije) || podaci.projekcije.length === 0) {
     return false;
@@ -23,10 +26,12 @@ function validirajPodatke(podaci) {
 
   return true;
 }
-function prikaziGresku() {
+
+function prikaziGresku(poruka = "Podaci nisu validni!") {
   const sala = document.getElementById("sala");
-  sala.innerHTML = `<p class="greska">Podaci nisu validni!</p>`;
+  sala.innerHTML = `<p class="greska">${poruka}</p>`;
 }
+
 function grupisiSjedistaPoRedovima(sjedista) {
   const redovi = {};
 
@@ -47,7 +52,6 @@ function grupisiSjedistaPoRedovima(sjedista) {
 }
 
 function prikaziSalu() {
-    
   const sala = document.getElementById("sala");
 
   if (!validirajPodatke(podaci)) {
@@ -65,10 +69,14 @@ function prikaziSalu() {
     oznakeRedovaHTML += `<div>${red}</div>`;
 
     for (const sjediste of redovi[red]) {
-      sjedistaHTML += `<div class="sjediste ${sjediste.status}"
-        data-red="${sjediste.red}"
-        data-broj="${sjediste.broj}"
-        title="Red ${sjediste.red}, sjedište ${sjediste.broj}"></div>`;
+      sjedistaHTML += `
+        <div
+          class="sjediste ${sjediste.status}"
+          data-red="${sjediste.red}"
+          data-broj="${sjediste.broj}"
+          title="Red ${sjediste.red}, sjedište ${sjediste.broj}">
+        </div>
+      `;
     }
   }
 
@@ -116,11 +124,12 @@ function prikaziSalu() {
   osvjeziDugmad();
   dodajKlikNaSjedista();
 }
+
 function dodajKlikNaSjedista() {
   const elementiSjedista = document.querySelectorAll(".sjediste");
 
   elementiSjedista.forEach((element) => {
-    element.addEventListener("click", function () {
+    element.addEventListener("click", async function () {
       const red = this.dataset.red;
       const broj = Number(this.dataset.broj);
 
@@ -129,9 +138,37 @@ function dodajKlikNaSjedista() {
         (s) => s.red === red && s.broj === broj
       );
 
-      if (sjediste && sjediste.status === "slobodno") {
-        sjediste.status = "rezervisano";
+      if (!sjediste || sjediste.status !== "slobodno") {
+        return;
+      }
+
+      const stariStatus = sjediste.status;
+      sjediste.status = "rezervisano";
+      prikaziSalu();
+
+      try {
+        const odgovor = await fetch("http://localhost:4000/rezervisi", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            projekcijaIndex: trenutnaProjekcijaIndex,
+            red: red,
+            broj: broj
+          })
+        });
+
+        const rezultat = await odgovor.json();
+
+        if (!odgovor.ok || !rezultat.success) {
+          throw new Error(rezultat.message || "Greška pri rezervaciji.");
+        }
+      } catch (greska) {
+        sjediste.status = stariStatus;
         prikaziSalu();
+        alert("Rezervacija nije uspjela.");
+        console.error(greska);
       }
     });
   });
@@ -159,6 +196,32 @@ function osvjeziDugmad() {
   sljedecaBtn.disabled = trenutnaProjekcijaIndex === podaci.projekcije.length - 1;
 }
 
+async function ucitajPodatke() {
+  try {
+    const odgovor = await fetch("http://localhost:4000/projekcije");
+    if (!odgovor.ok) {
+      throw new Error("Greška pri učitavanju podataka sa servera.");
+    }
+
+    podaci = await odgovor.json();
+
+    if (!validirajPodatke(podaci)) {
+      prikaziGresku();
+      return;
+    }
+
+    prikaziSalu();
+  } catch (greska) {
+    console.error(greska);
+
+    if (window.podaci && validirajPodatke(window.podaci)) {
+      podaci = window.podaci;
+      prikaziSalu();
+    } else {
+      prikaziGresku("Greška pri učitavanju podataka.");
+    }
+  }
+}
 
 function pokreniAplikaciju() {
   document
@@ -169,5 +232,7 @@ function pokreniAplikaciju() {
     .getElementById("sljedecaBtn")
     .addEventListener("click", idiNaSljedecuProjekciju);
 
-  prikaziSalu();
+  ucitajPodatke();
 }
+
+document.addEventListener("DOMContentLoaded", pokreniAplikaciju);
