@@ -3,12 +3,6 @@ let trenutnaProjekcijaIndex = 0;
 
 const DOZVOLJENI_STATUSI = ["slobodno", "zauzeto", "rezervisano"];
 
-async function ucitajPodatke() {
-  const odgovor = await fetch("http://localhost:4000/projekcije");
-  const data = await odgovor.json();
-  podaci = data;
-}
-
 function validirajPodatke(podaci) {
   if (!podaci || !Array.isArray(podaci.projekcije) || podaci.projekcije.length === 0) {
     return false;
@@ -33,9 +27,9 @@ function validirajPodatke(podaci) {
   return true;
 }
 
-function prikaziGresku() {
+function prikaziGresku(poruka = "Podaci nisu validni!") {
   const sala = document.getElementById("sala");
-  sala.innerHTML = `<p class="greska">Podaci nisu validni!</p>`;
+  sala.innerHTML = `<p class="greska">${poruka}</p>`;
 }
 
 function grupisiSjedistaPoRedovima(sjedista) {
@@ -57,16 +51,6 @@ function grupisiSjedistaPoRedovima(sjedista) {
   return { redovi, sortiraniRedovi };
 }
 
-function osvjeziDugmad() {
-  const prethodnaBtn = document.getElementById("prethodnaBtn");
-  const sljedecaBtn = document.getElementById("sljedecaBtn");
-
-  if (!prethodnaBtn || !sljedecaBtn || !podaci) return;
-
-  prethodnaBtn.disabled = trenutnaProjekcijaIndex === 0;
-  sljedecaBtn.disabled = trenutnaProjekcijaIndex === podaci.projekcije.length - 1;
-}
-
 function prikaziSalu() {
   const sala = document.getElementById("sala");
 
@@ -86,12 +70,12 @@ function prikaziSalu() {
 
     for (const sjediste of redovi[red]) {
       sjedistaHTML += `
-        <div 
+        <div
           class="sjediste ${sjediste.status}"
           data-red="${sjediste.red}"
           data-broj="${sjediste.broj}"
-          title="Red ${sjediste.red}, sjedište ${sjediste.broj}"
-        ></div>
+          title="Red ${sjediste.red}, sjedište ${sjediste.broj}">
+        </div>
       `;
     }
   }
@@ -137,25 +121,8 @@ function prikaziSalu() {
     </div>
   `;
 
-  dodajKlikNaSjedista();
   osvjeziDugmad();
-}
-
-async function rezervisiSjediste(red, broj) {
-  await fetch("http://localhost:4000/rezervisi", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      projekcijaIndex: trenutnaProjekcijaIndex,
-      red: red,
-      broj: broj
-    })
-  });
-
-  await ucitajPodatke();
-  prikaziSalu();
+  dodajKlikNaSjedista();
 }
 
 function dodajKlikNaSjedista() {
@@ -171,8 +138,37 @@ function dodajKlikNaSjedista() {
         (s) => s.red === red && s.broj === broj
       );
 
-      if (sjediste && sjediste.status === "slobodno") {
-        await rezervisiSjediste(red, broj);
+      if (!sjediste || sjediste.status !== "slobodno") {
+        return;
+      }
+
+      const stariStatus = sjediste.status;
+      sjediste.status = "rezervisano";
+      prikaziSalu();
+
+      try {
+        const odgovor = await fetch("http://localhost:4000/rezervisi", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            projekcijaIndex: trenutnaProjekcijaIndex,
+            red: red,
+            broj: broj
+          })
+        });
+
+        const rezultat = await odgovor.json();
+
+        if (!odgovor.ok || !rezultat.success) {
+          throw new Error(rezultat.message || "Greška pri rezervaciji.");
+        }
+      } catch (greska) {
+        sjediste.status = stariStatus;
+        prikaziSalu();
+        alert("Rezervacija nije uspjela.");
+        console.error(greska);
       }
     });
   });
@@ -192,23 +188,51 @@ function idiNaSljedecuProjekciju() {
   }
 }
 
-function poveziDugmad() {
+function osvjeziDugmad() {
   const prethodnaBtn = document.getElementById("prethodnaBtn");
   const sljedecaBtn = document.getElementById("sljedecaBtn");
 
-  if (prethodnaBtn) {
-    prethodnaBtn.addEventListener("click", idiNaPrethodnuProjekciju);
-  }
+  prethodnaBtn.disabled = trenutnaProjekcijaIndex === 0;
+  sljedecaBtn.disabled = trenutnaProjekcijaIndex === podaci.projekcije.length - 1;
+}
 
-  if (sljedecaBtn) {
-    sljedecaBtn.addEventListener("click", idiNaSljedecuProjekciju);
+async function ucitajPodatke() {
+  try {
+    const odgovor = await fetch("http://localhost:4000/projekcije");
+    if (!odgovor.ok) {
+      throw new Error("Greška pri učitavanju podataka sa servera.");
+    }
+
+    podaci = await odgovor.json();
+
+    if (!validirajPodatke(podaci)) {
+      prikaziGresku();
+      return;
+    }
+
+    prikaziSalu();
+  } catch (greska) {
+    console.error(greska);
+
+    if (window.podaci && validirajPodatke(window.podaci)) {
+      podaci = window.podaci;
+      prikaziSalu();
+    } else {
+      prikaziGresku("Greška pri učitavanju podataka.");
+    }
   }
 }
 
-async function init() {
-  await ucitajPodatke();
-  poveziDugmad();
-  prikaziSalu();
+function pokreniAplikaciju() {
+  document
+    .getElementById("prethodnaBtn")
+    .addEventListener("click", idiNaPrethodnuProjekciju);
+
+  document
+    .getElementById("sljedecaBtn")
+    .addEventListener("click", idiNaSljedecuProjekciju);
+
+  ucitajPodatke();
 }
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", pokreniAplikaciju);
