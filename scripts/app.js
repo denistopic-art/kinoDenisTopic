@@ -1,4 +1,4 @@
-const podaci = {
+window.podaci = {
   projekcije: [
     {
       film: "Avatar 2",
@@ -472,4 +472,3 @@ const podaci = {
   ]
 };
 
-document.addEventListener("DOMContentLoaded", pokreniAplikaciju);
